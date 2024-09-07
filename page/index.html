@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Invites</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .input-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .invites-list {
+            margin-top: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .invitee {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            margin-bottom: 10px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .no-invites {
+            text-align: center;
+            color: #e74c3c;
+        }
+
+        .total-invites {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Referral Invites Checker</h1>
+
+    <div class="input-section">
+        <label for="player-input">Enter Player Name:</label>
+        <input type="text" id="player-input" placeholder="Enter player name">
+        <button onclick="submitPlayer()">Submit</button>
+    </div>
+
+    <h2>Invites for <span id="player-name"></span></h2>
+    <p class="total-invites">Total Invites: <span id="total-invites">0</span></p>
+    <div class="invites-list" id="invites-list"></div>
+
+    <script>
+        // Function to fetch and display invites for a player
+        function fetchInvites(player) {
+            document.getElementById('player-name').textContent = player;
+
+            fetch(`http://localhost:9999/api/invites/${player}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-invites').textContent = data.total_invites;
+
+                    const invitesList = document.getElementById('invites-list');
+                    invitesList.innerHTML = ''; // Clear the list of invites
+
+                    if (data.invited_players.length > 0) {
+                        data.invited_players.forEach(invitee => {
+                            const inviteeDiv = document.createElement('div');
+                            inviteeDiv.classList.add('invitee');
+                            inviteeDiv.textContent = invitee;
+                            invitesList.appendChild(inviteeDiv);
+                        });
+                    } else {
+                        invitesList.innerHTML = '<p class="no-invites">No invites found for this player.</p>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching invites:', err);
+                    alert('Error fetching invites. Please try again later.');
+                });
+        }
+
+        // Function to handle form submission
+        function submitPlayer() {
+            const playerName = document.getElementById('player-input').value;
+            if (playerName) {
+                fetchInvites(playerName);
+            } else {
+                alert('Please enter a player name.');
+            }
+        }
+    </script>
+</body>
+</html>
